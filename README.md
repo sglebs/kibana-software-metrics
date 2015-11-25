@@ -10,7 +10,7 @@ After you git clone this project, you need to:
 
  * Build the docker image: docker build -rm -t=elasticsearch-kibana .
  * Run the elasticsearch & kibana servers under docker: docker run -d -p 8000:8000 -p 9200:9200 elasticsearch-kibana
- * If you are running boot2docker or similar ones under VirtualBox, make sure to define port forwards in VirtualBox for these 2 ports (8000 and 9200) in Settings/Networkk/Port Forwarding.
+ * If you are running boot2docker or similar ones under VirtualBox, make sure to define port forwards in VirtualBox for these 2 ports (8000 and 9200) in Settings/Network/Port Forwarding.
  * Wait 2 or 3 minutes for the services to be running
  * Populate elasticsearch with some data:
    * For Structure101 data: python s101_to_kibana.py -e "http://localhost:9200" -s "http://pgbuild:8280/s101g/tracker/size.plot"
@@ -21,7 +21,7 @@ After you git clone this project, you need to:
  
 Gotchas
 =======
-If you run the script twice, the data will be logged twice. There is no checking for "but I have already submitted this data before"
+If you run the script twice, the data will be logged twice. There is no checking for "but I have already submitted this data before".
 We plan to add command-line flags such as --afterDate and --upToDate so you can run multiple times and process data by "time slices".
 This could be used in a continuous build, for example.
 
