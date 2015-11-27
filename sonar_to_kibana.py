@@ -31,19 +31,32 @@ if __name__ == '__main__':
     sonar_resource_url = "%s/api/resources?format=json&metrics=%s" % (sonar_url, sonar_metrics)
     input_json_stream = requests.get(sonar_resource_url)
     sonar_data = input_json_stream.json()
-    resource_ids = set()
+    resource_by_ids = {}
     for resource in sonar_data:
-        resource_ids.add (resource["id"])
         #print(resource)
-        body = {"name": resource["name"],"scope": resource["scope"],"qualifier": resource["qualifier"],
+        attribs = {"name": resource["name"], "scope": resource["scope"], "qualifier": resource["qualifier"],
                         "date": resource["date"],"lang": resource["lang"], "version": resource["version"]}
         for measurement in resource["msr"]:
-            body[measurement["key"]] = measurement["val"]
-        print(body)
-        #es.index(index="sonar-%s" % chart_name, doc_type=chart_name, body=body)
+            attribs[measurement["key"]] = measurement["val"]
+
+        resource_by_ids[resource["id"]]=attribs
+        print(attribs)
+        #es.index(index="sonar-%s" % chart_name, doc_type=chart_name, body=attribs)
     sonar_time_machine_url = "%s/api/timemachine?format=json&metrics=%s" % (sonar_url, sonar_metrics)
-    for resource_id in resource_ids:
+    for resource_id,resource_attribs in resource_by_ids.items():
         resource_time_mahine_url = "%s&resource=%s" % (sonar_time_machine_url, resource_id)
         input_json_stream = requests.get(resource_time_mahine_url)
         sonar_data = input_json_stream.json()
-        print (sonar_data)
+        columns_and_data = sonar_data[0]
+        metric_names_as_dict = columns_and_data["cols"]
+        metric_names = [d["metric"] for d in metric_names_as_dict]
+        metrics_per_dates = columns_and_data["cells"]
+        for metrics_per_date in metrics_per_dates:
+            metric_date = metrics_per_date["d"]
+            metric_values = metrics_per_date["v"]
+            metric_names_and_values = {key:value for key,value in zip(metric_names, metric_values)}
+            metric_names_and_values["date"] = metric_date
+            for extra_attrib in ["name", "scope", "qualifier", "lang"]: # FIXME: how about "version" How do we know which version a timemachine sample belongs to??
+                metric_names_and_values[extra_attrib] = resource_attribs[extra_attrib]
+            print (metric_names_and_values)
+            #es.index(index="sonar-%s" % chart_name, doc_type=chart_name, body=metric_names_and_values)
