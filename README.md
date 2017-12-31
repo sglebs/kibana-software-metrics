@@ -39,4 +39,6 @@ To kill all zombie docker images:
  * docker rmi -f $(docker images -f "dangling=true" -q)
  * docker run -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker:/var/lib/docker --rm martin/docker-cleanup-volumes 
  
- 
+ #### Thank you!
+
+Special thanks to [Softplan](http://www.softplan.con.br) for sponsoring this project/experiment. In particular, Anderson Soffa for the support.
